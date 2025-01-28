@@ -1,14 +1,13 @@
-let filterButton1Active = false;
 let jsonData = []; // Global variable for JSON data
 
-// Fetch data and initialize the page
+// Fetch the data and initialize the page
 (async () => {
     try {
         const response = await fetch("data.json"); // Replace with the correct JSON file path
         if (!response.ok) throw new Error("Failed to fetch data.");
         jsonData = await response.json();
         populateTable(jsonData);
-        updateFilters(jsonData);
+        updateMeNameDropdown(jsonData);
     } catch (error) {
         console.error("Error fetching data:", error);
     }
@@ -30,84 +29,142 @@ function populateTable(data) {
     });
 }
 
-// Update dropdown filters dynamically
-function updateFilters(filteredData) {
-    const dropdownMapping = {
-        "filter-me-name": "ME Name",
-        "filter-beat": "Beat",
-        "filter-launch": "Launch",
-        "filter-dbo": "DBO",
-    };
+// Update the ME Name dropdown dynamically
+function updateMeNameDropdown(data) {
+    const meNameDropdown = document.getElementById("filter-me-name");
+    const uniqueMeNames = [...new Set(data.map((row) => row["ME Name"]))]; // Get unique ME Names
 
-    Object.entries(dropdownMapping).forEach(([dropdownId, columnName]) => {
-        const dropdown = document.getElementById(dropdownId);
-        const uniqueOptions = [...new Set(filteredData.map((row) => row[columnName]))];
-
-        dropdown.innerHTML = `<option value="">${columnName}</option>`;
-        uniqueOptions.forEach((option) => {
-            const opt = document.createElement("option");
-            opt.textContent = option;
-            opt.value = option;
-            dropdown.appendChild(opt);
-        });
+    meNameDropdown.innerHTML = `<option value="">Select ME Name</option>`;
+    uniqueMeNames.forEach((meName) => {
+        const option = document.createElement("option");
+        option.textContent = meName;
+        option.value = meName;
+        meNameDropdown.appendChild(option);
     });
+
+    // Add event listener for cascading effect
+    meNameDropdown.addEventListener("change", () => updateBeatDropdown(data, meNameDropdown.value));
 }
 
-// Apply filters and update the table
-function applyFilters() {
-    let filteredData = [...jsonData];
+// Update the Beat dropdown dynamically
+function updateBeatDropdown(data, selectedMeName) {
+    const beatDropdown = document.getElementById("filter-beat");
+    let filteredData = data;
 
-    // Get dropdown filter values
-    const filterValues = {
-        "ME Name": document.getElementById("filter-me-name").value,
-        "Beat": document.getElementById("filter-beat").value,
-        "Launch": document.getElementById("filter-launch").value,
-        "DBO": document.getElementById("filter-dbo").value,
-    };
-
-    // Apply dropdown filters
-    Object.entries(filterValues).forEach(([column, value]) => {
-        if (value) filteredData = filteredData.filter((row) => row[column] === value);
-    });
-
-    // Search Bar Filter
-    const searchQuery = document.getElementById("search-bar").value.toLowerCase();
-    if (searchQuery) {
-        filteredData = filteredData.filter((row) =>
-            ["HUL Code", "HUL Outlet Name"].some((key) =>
-                row[key]?.toLowerCase().includes(searchQuery)
-            )
-        );
+    if (selectedMeName) {
+        filteredData = data.filter((row) => row["ME Name"] === selectedMeName);
     }
 
-    // Filter button logic
-    if (filterButton1Active) {
-        filteredData = filteredData.filter((row) => row["ECO"] < 500);
+    const uniqueBeats = [...new Set(filteredData.map((row) => row["Beat"]))]; // Get unique Beats
+    beatDropdown.innerHTML = `<option value="">Select Beat</option>`;
+    uniqueBeats.forEach((beat) => {
+        const option = document.createElement("option");
+        option.textContent = beat;
+        option.value = beat;
+        beatDropdown.appendChild(option);
+    });
+
+    beatDropdown.addEventListener("change", () =>
+        updateShikharDropdown(filteredData, beatDropdown.value)
+    );
+    applyFilters(filteredData);
+}
+
+// Update the Shikhar dropdown dynamically
+function updateShikharDropdown(data, selectedBeat) {
+    const shikharDropdown = document.getElementById("filter-shikhar");
+    let filteredData = data;
+
+    if (selectedBeat) {
+        filteredData = data.filter((row) => row["Beat"] === selectedBeat);
+    }
+
+    const uniqueShikharValues = [...new Set(filteredData.map((row) => row["Shikhar"]))]; // Get unique Shikhar values
+    shikharDropdown.innerHTML = `<option value="">Select Shikhar</option>`;
+    uniqueShikharValues.forEach((shikhar) => {
+        const option = document.createElement("option");
+        option.textContent = shikhar;
+        option.value = shikhar;
+        shikharDropdown.appendChild(option);
+    });
+
+    shikharDropdown.addEventListener("change", () =>
+        updateLaunchDropdown(filteredData, shikharDropdown.value)
+    );
+    applyFilters(filteredData);
+}
+
+// Update the Launch dropdown dynamically
+function updateLaunchDropdown(data, selectedShikhar) {
+    const launchDropdown = document.getElementById("filter-launch");
+    let filteredData = data;
+
+    if (selectedShikhar) {
+        filteredData = data.filter((row) => row["Shikhar"] === selectedShikhar);
+    }
+
+    const uniqueLaunchValues = [...new Set(filteredData.map((row) => row["Launch"]))]; // Get unique Launch values
+    launchDropdown.innerHTML = `<option value="">Select Launch</option>`;
+    uniqueLaunchValues.forEach((launch) => {
+        const option = document.createElement("option");
+        option.textContent = launch;
+        option.value = launch;
+        launchDropdown.appendChild(option);
+    });
+
+    launchDropdown.addEventListener("change", () =>
+        updateDboDropdown(filteredData, launchDropdown.value)
+    );
+    applyFilters(filteredData);
+}
+
+// Update the DBO dropdown dynamically
+function updateDboDropdown(data, selectedLaunch) {
+    const dboDropdown = document.getElementById("filter-dbo");
+    let filteredData = data;
+
+    if (selectedLaunch) {
+        filteredData = data.filter((row) => row["Launch"] === selectedLaunch);
+    }
+
+    const uniqueDboValues = [...new Set(filteredData.map((row) => row["DBO"]))]; // Get unique DBO values
+    dboDropdown.innerHTML = `<option value="">Select DBO</option>`;
+    uniqueDboValues.forEach((dbo) => {
+        const option = document.createElement("option");
+        option.textContent = dbo;
+        option.value = dbo;
+        dboDropdown.appendChild(option);
+    });
+
+    dboDropdown.addEventListener("change", () => applyFilters(filteredData));
+    applyFilters(filteredData);
+}
+
+// Apply all filters and update the table
+function applyFilters(data) {
+    const selectedMeName = document.getElementById("filter-me-name").value;
+    const selectedBeat = document.getElementById("filter-beat").value;
+    const selectedShikhar = document.getElementById("filter-shikhar").value;
+    const selectedLaunch = document.getElementById("filter-launch").value;
+    const selectedDbo = document.getElementById("filter-dbo").value;
+
+    let filteredData = data;
+
+    if (selectedMeName) {
+        filteredData = filteredData.filter((row) => row["ME Name"] === selectedMeName);
+    }
+    if (selectedBeat) {
+        filteredData = filteredData.filter((row) => row["Beat"] === selectedBeat);
+    }
+    if (selectedShikhar) {
+        filteredData = filteredData.filter((row) => row["Shikhar"] === selectedShikhar);
+    }
+    if (selectedLaunch) {
+        filteredData = filteredData.filter((row) => row["Launch"] === selectedLaunch);
+    }
+    if (selectedDbo) {
+        filteredData = filteredData.filter((row) => row["DBO"] === selectedDbo);
     }
 
     populateTable(filteredData);
-    updateFilters(filteredData); // Update dropdowns based on current filtered data
 }
-
-// Reset all filters and table
-document.getElementById("reset-button").addEventListener("click", () => {
-    document.getElementById("search-bar").value = "";
-    document.querySelectorAll("select").forEach((dropdown) => (dropdown.selectedIndex = 0));
-    filterButton1Active = false;
-    document.getElementById("filter-button-1").style.backgroundColor = "blue";
-    populateTable(jsonData); // Reset to original data
-    updateFilters(jsonData); // Reset dropdowns
-});
-
-// Toggle the first filter button
-document.getElementById("filter-button-1").addEventListener("click", () => {
-    filterButton1Active = !filterButton1Active;
-    document.getElementById("filter-button-1").style.backgroundColor = filterButton1Active ? "green" : "blue";
-    applyFilters();
-});
-
-// Event listeners for dropdowns and search bar
-["filter-me-name", "filter-beat", "filter-launch", "filter-dbo"].forEach((id) =>
-    document.getElementById(id).addEventListener("change", applyFilters)
-);
-document.getElementById("search-bar").addEventListener("input", applyFilters);
