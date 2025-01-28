@@ -36,17 +36,17 @@ function applyFilters() {
     let filteredData = [...jsonData]; // Start with the original data
 
     // Get dropdown filter values
-    const filterDetsMeName = document.getElementById("filter-deets-me-name").value;
-    const filterDetsBeat = document.getElementById("filter-deets-beat").value;
+    const filterMeName = document.getElementById("filter-me-name").value;
+    const filterBeat = document.getElementById("filter-beat").value;
     const filterFnrMeName = document.getElementById("filter-fnr-me-name").value;
     const filterFnrBeat = document.getElementById("filter-fnr-beat").value;
 
     // Apply dropdown filters
-    if (filterDetsMeName !== "") {
-        filteredData = filteredData.filter((row) => row["DETS ME Name"] === filterDetsMeName);
+    if (filterMeName !== "") {
+        filteredData = filteredData.filter((row) => row["ME Name"] === filterMeName);
     }
-    if (filterDetsBeat !== "") {
-        filteredData = filteredData.filter((row) => row["DETS Beat"] === filterDetsBeat);
+    if (filterBeat !== "") {
+        filteredData = filteredData.filter((row) => row["Beat"] === filterBeat);
     }
     if (filterFnrMeName !== "") {
         filteredData = filteredData.filter((row) => row["FnR ME Name"] === filterFnrMeName);
@@ -85,22 +85,22 @@ function applyFilters() {
 
 // Function to dynamically update dropdown options
 function updateDropdowns(filteredData) {
-    const detsMeNames = new Set();
-    const detsBeats = new Set();
+    const meNames = new Set();
+    const beats = new Set();
     const fnrMeNames = new Set();
     const fnrBeats = new Set();
 
     // Collect unique options from filtered data
     filteredData.forEach((row) => {
-        if (row["DETS ME Name"]) detsMeNames.add(row["DETS ME Name"]);
-        if (row["DETS Beat"]) detsBeats.add(row["DETS Beat"]);
+        if (row["ME Name"]) meNames.add(row["ME Name"]);
+        if (row["Beat"]) beats.add(row["Beat"]);
         if (row["FnR ME Name"]) fnrMeNames.add(row["FnR ME Name"]);
         if (row["FnR Beat"]) fnrBeats.add(row["FnR Beat"]);
     });
 
     // Repopulate dropdowns with updated options
-    populateSelectDropdown("filter-deets-me-name", detsMeNames, "DETS ME Name");
-    populateSelectDropdown("filter-deets-beat", detsBeats, "DETS Beat");
+    populateSelectDropdown("filter-me-name", meNames, "ME Name");
+    populateSelectDropdown("filter-beat", beats, "Beat");
     populateSelectDropdown("filter-fnr-me-name", fnrMeNames, "FnR ME Name");
     populateSelectDropdown("filter-fnr-beat", fnrBeats, "FnR Beat");
 }
@@ -140,8 +140,8 @@ document.getElementById("reset-button").addEventListener("click", () => {
     document.getElementById("search-bar").value = "";
 
     // Reset dropdown filters to default
-    document.getElementById("filter-deets-me-name").selectedIndex = 0;
-    document.getElementById("filter-deets-beat").selectedIndex = 0;
+    document.getElementById("filter-me-name").selectedIndex = 0;
+    document.getElementById("filter-beat").selectedIndex = 0;
     document.getElementById("filter-fnr-me-name").selectedIndex = 0;
     document.getElementById("filter-fnr-beat").selectedIndex = 0;
 
@@ -151,8 +151,8 @@ document.getElementById("reset-button").addEventListener("click", () => {
 
 // Event listeners for dropdowns and search bar
 document.getElementById("search-bar").addEventListener("input", applyFilters);
-document.getElementById("filter-deets-me-name").addEventListener("change", applyFilters);
-document.getElementById("filter-deets-beat").addEventListener("change", applyFilters);
+document.getElementById("filter-me-name").addEventListener("change", applyFilters);
+document.getElementById("filter-beat").addEventListener("change", applyFilters);
 document.getElementById("filter-fnr-me-name").addEventListener("change", applyFilters);
 document.getElementById("filter-fnr-beat").addEventListener("change", applyFilters);
 
