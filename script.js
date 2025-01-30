@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     let jsonData = []; // Store loaded data
-    let isCoverageFiltered = false; // Track coverage button state
+    let isCoverageFiltered = false; // Track coverage filter state
     const tableBody = document.getElementById("table-body");
     const coverageButton = document.getElementById("filter-button-1");
     const resetButton = document.getElementById("reset-button");
@@ -15,9 +15,9 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .catch(error => console.error("Error loading JSON:", error));
 
-    // Function to Populate Table
+    // Populate Table
     function populateTable(data) {
-        tableBody.innerHTML = ""; // Clear existing rows
+        tableBody.innerHTML = ""; // Clear table
         data.forEach(row => {
             let tr = document.createElement("tr");
             Object.keys(row).forEach(key => {
@@ -29,9 +29,9 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Function to Populate Filters Dynamically
+    // Populate Filters Dynamically
     function populateFilters(data) {
-        const filters = {
+        const filterMap = {
             "filter-me-name": "ME Name",
             "filter-beat": "Beat",
             "filter-shikhar": "Shikhar Onboarding",
@@ -41,16 +41,16 @@ document.addEventListener("DOMContentLoaded", function () {
             "filter-coverage": "Coverage"
         };
 
-        Object.keys(filters).forEach(filterId => {
+        Object.keys(filterMap).forEach(filterId => {
             let select = document.getElementById(filterId);
             if (select) {
-                let selectedValue = select.value;
-                select.innerHTML = `<option value="">${filters[filterId]}</option>`; // Header as first option
+                let currentSelection = select.value; // Preserve selection
+                select.innerHTML = `<option value="">${filterMap[filterId]}</option>`; // First option acts as "ALL"
 
-                let uniqueValues = [...new Set(data.map(row => row[filters[filterId]]).filter(v => v !== "" && v !== undefined))];
+                let uniqueValues = [...new Set(data.map(row => row[filterMap[filterId]]).filter(v => v !== "" && v !== undefined))];
 
-                if (["Coverage", "TLSD"].includes(filters[filterId])) {
-                    uniqueValues = uniqueValues.map(Number).sort((a, b) => a - b);
+                if (["Coverage", "TLSD"].includes(filterMap[filterId])) {
+                    uniqueValues = uniqueValues.map(Number).sort((a, b) => a - b); // Ensure sorting for numbers
                 }
 
                 uniqueValues.forEach(value => {
@@ -60,18 +60,18 @@ document.addEventListener("DOMContentLoaded", function () {
                     select.appendChild(option);
                 });
 
-                // Restore previous selection if still valid
-                if (selectedValue && uniqueValues.includes(selectedValue)) {
-                    select.value = selectedValue;
+                // Restore previous selection if it still exists
+                if (currentSelection && uniqueValues.includes(currentSelection)) {
+                    select.value = currentSelection;
                 }
 
-                // Add event listener to dynamically update filters
+                // Add change event listener to update filters interactively
                 select.addEventListener("change", applyFilters);
             }
         });
     }
 
-    // Function to Apply Filters
+    // Apply Filters
     function applyFilters() {
         let searchTerm = document.getElementById("search-bar").value.trim().toLowerCase();
         let selectedFilters = {
@@ -103,9 +103,9 @@ document.addEventListener("DOMContentLoaded", function () {
         updateFilters(filteredData);
     }
 
-    // Update Dropdown Options Based on Filters
+    // Update Filters Based on Current Data
     function updateFilters(filteredData) {
-        const filters = {
+        const filterMap = {
             "filter-me-name": "ME Name",
             "filter-beat": "Beat",
             "filter-shikhar": "Shikhar Onboarding",
@@ -115,15 +115,15 @@ document.addEventListener("DOMContentLoaded", function () {
             "filter-coverage": "Coverage"
         };
 
-        Object.keys(filters).forEach(filterId => {
+        Object.keys(filterMap).forEach(filterId => {
             let select = document.getElementById(filterId);
             if (select) {
-                let selectedValue = select.value;
-                select.innerHTML = `<option value="">${filters[filterId]}</option>`; // Keep header as default option
+                let currentSelection = select.value;
+                select.innerHTML = `<option value="">${filterMap[filterId]}</option>`; // Keep header as first option
 
-                let uniqueValues = [...new Set(filteredData.map(row => row[filters[filterId]]).filter(v => v !== "" && v !== undefined))];
+                let uniqueValues = [...new Set(filteredData.map(row => row[filterMap[filterId]]).filter(v => v !== "" && v !== undefined))];
 
-                if (["Coverage", "TLSD"].includes(filters[filterId])) {
+                if (["Coverage", "TLSD"].includes(filterMap[filterId])) {
                     uniqueValues = uniqueValues.map(Number).sort((a, b) => a - b);
                 }
 
@@ -134,8 +134,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     select.appendChild(option);
                 });
 
-                if (selectedValue && uniqueValues.includes(selectedValue)) {
-                    select.value = selectedValue;
+                if (currentSelection && uniqueValues.includes(currentSelection)) {
+                    select.value = currentSelection;
                 }
             }
         });
