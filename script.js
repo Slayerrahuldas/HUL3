@@ -85,8 +85,16 @@ document.addEventListener("DOMContentLoaded", function() {
         renderTable();
     });
 
-    // Search bar listener
-    searchBar.addEventListener('input', renderTable);
+    // Search Bar Filter
+    const searchQuery = document.getElementById("search-bar").value.toLowerCase();
+    if (searchQuery) {
+        filteredData = filteredData.filter((row) => {
+            return (
+                row["HUL Code"].toLowerCase().includes(searchQuery) ||
+                row["HUL Outlet Name"].toLowerCase().includes(searchQuery)
+            );
+        });
+    }
 
     // Dropdown filters listener
     Object.values(filters).forEach(filter => {
