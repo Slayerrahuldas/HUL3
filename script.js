@@ -40,7 +40,7 @@ function applyFilters() {
     const filterShikhar = document.getElementById("filter-shikhar").value;
     const filterLaunch = document.getElementById("filter-launch").value;
     const filterDBO = document.getElementById("filter-dbo").value;
-	const filterTLSD = document.getElementById("filter-tlsd").value;
+    const filterTLSD = document.getElementById("filter-tlsd").value;
 	
 	// Apply dropdown filters
     if (filterMeName !== "") {
@@ -91,8 +91,8 @@ function updateDropdowns(filteredData) {
     const Beats = new Set();
     const Shikhar = new Set();
     const Launch = new Set();
-	const DBO = new Set();
-	const TLSD = new Set();
+    const DBO = new Set();
+    const TLSD = new Set();
 
     // Collect unique options from filtered data
     filteredData.forEach((row) => {
@@ -100,8 +100,8 @@ function updateDropdowns(filteredData) {
         if (row["Beat"]) detsBeats.add(row["Beat"]);
         if (row["Shikhar"]) fnrMeNames.add(row["Shikhar"]);
         if (row["Launch"]) fnrBeats.add(row["Launch"]);
-		if (row["DBO"]) fnrBeats.add(row["DBO"]);
-		if (row["TLSD"]) fnrBeats.add(row["TLSD"]);
+	if (row["DBO"]) fnrBeats.add(row["DBO"]);
+	if (row["TLSD"]) fnrBeats.add(row["TLSD"]);
     });
 
     // Repopulate dropdowns with updated options
@@ -109,8 +109,8 @@ function updateDropdowns(filteredData) {
     populateSelectDropdown("filter-beat", detsBeats, "Beat");
     populateSelectDropdown("filter-launch", fnrMeNames, "Launch");
     populateSelectDropdown("filter-shikhar", fnrBeats, "Shikhar");
-	populateSelectDropdown("filter-dbo", fnrBeats, "DBO");
-	populateSelectDropdown("filter-tlsd", fnrBeats, "TLSD");
+    populateSelectDropdown("filter-dbo", fnrBeats, "DBO");
+    populateSelectDropdown("filter-tlsd", fnrBeats, "TLSD");
 }
 
 // Function to populate dropdown filters
@@ -150,8 +150,8 @@ document.getElementById("reset-button").addEventListener("click", () => {
     document.getElementById("filter-beat").selectedIndex = 0;
     document.getElementById("filter-shikhar").selectedIndex = 0;
     document.getElementById("filter-launch").selectedIndex = 0;
-	document.getElementById("filter-dbo").selectedIndex = 0;
-	document.getElementById("filter-tlsd").selectedIndex = 0;
+    document.getElementById("filter-dbo").selectedIndex = 0;
+    document.getElementById("filter-tlsd").selectedIndex = 0;
 
     // Reapply filters to show the unfiltered data
     applyFilters();
