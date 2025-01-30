@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     let jsonData = []; // Store loaded data
-    let isCoverageFiltered = false; // Track coverage filter state
+    let isResetClicked = false; // Track reset button clicks
     const tableBody = document.getElementById("table-body");
     const coverageButton = document.getElementById("filter-button-1");
     const resetButton = document.getElementById("reset-button");
@@ -15,43 +15,39 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .catch(error => console.error("Error loading JSON:", error));
 
-    // Populate Table
+    // Function to Populate Table
     function populateTable(data) {
-        tableBody.innerHTML = ""; // Clear table
+        tableBody.innerHTML = ""; // Clear existing rows
         data.forEach(row => {
             let tr = document.createElement("tr");
-            Object.keys(row).forEach(key => {
+            Object.values(row).forEach(value => {
                 let td = document.createElement("td");
-                td.textContent = row[key];
+                td.textContent = value;
                 tr.appendChild(td);
             });
             tableBody.appendChild(tr);
         });
     }
 
-    // Populate Filters Dynamically
+    // Function to Populate Filters Dynamically
     function populateFilters(data) {
-        const filterMap = {
+        const filters = {
             "filter-me-name": "ME Name",
             "filter-beat": "Beat",
             "filter-shikhar": "Shikhar Onboarding",
             "filter-launch": "Launch",
             "filter-dbo": "DBO",
-            "filter-tlsd": "TLSD",
-            "filter-coverage": "Coverage"
+            "filter-tlsd": "TLSD"
         };
 
-        Object.keys(filterMap).forEach(filterId => {
+        // Populate each dropdown with unique values
+        Object.keys(filters).forEach(filterId => {
             let select = document.getElementById(filterId);
             if (select) {
-                let currentSelection = select.value; // Preserve selection
-                select.innerHTML = `<option value="">${filterMap[filterId]}</option>`; // First option acts as "ALL"
+                // Reset dropdown with header as the default option
+                select.innerHTML = `<option value="">${filters[filterId]}</option>`;
 
-                let uniqueValues = [...new Set(data.map(row => row[filterMap[filterId]]).filter(v => v !== "" && v !== undefined))];
-
-                if (["Coverage", "TLSD"].includes(filterMap[filterId])) {
-                    uniqueValues = uniqueValues.map(Number).sort((a, b) => a - b); // Ensure sorting for numbers
-                }
+                let uniqueValues = [...new Set(data.map(row => row[filters[filterId]]?.trim()).filter(v => v))];
 
                 uniqueValues.forEach(value => {
                     let option = document.createElement("option");
@@ -60,18 +56,13 @@ document.addEventListener("DOMContentLoaded", function () {
                     select.appendChild(option);
                 });
 
-                // Restore previous selection if it still exists
-                if (currentSelection && uniqueValues.includes(currentSelection)) {
-                    select.value = currentSelection;
-                }
-
-                // Add change event listener to update filters interactively
+                // Add event listener to update other filters when one is selected
                 select.addEventListener("change", applyFilters);
             }
         });
     }
 
-    // Apply Filters
+    // Function to Apply Filters
     function applyFilters() {
         let searchTerm = document.getElementById("search-bar").value.trim().toLowerCase();
         let selectedFilters = {
@@ -80,8 +71,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "Shikhar Onboarding": document.getElementById("filter-shikhar").value.trim(),
             "Launch": document.getElementById("filter-launch").value.trim(),
             "DBO": document.getElementById("filter-dbo").value.trim(),
-            "TLSD": document.getElementById("filter-tlsd").value.trim(),
-            "Coverage": document.getElementById("filter-coverage").value.trim()
+            "TLSD": document.getElementById("filter-tlsd").value.trim()
         };
 
         let filteredData = jsonData.filter(row => {
@@ -94,78 +84,37 @@ document.addEventListener("DOMContentLoaded", function () {
                 (selectedFilters["Shikhar Onboarding"] === "" || row["Shikhar Onboarding"] === selectedFilters["Shikhar Onboarding"]) &&
                 (selectedFilters["Launch"] === "" || row["Launch"] === selectedFilters["Launch"]) &&
                 (selectedFilters["DBO"] === "" || row["DBO"] === selectedFilters["DBO"]) &&
-                (selectedFilters["TLSD"] === "" || Number(row["TLSD"]) === Number(selectedFilters["TLSD"])) &&
-                (selectedFilters["Coverage"] === "" || Number(row["Coverage"]) === Number(selectedFilters["Coverage"]))
+                (selectedFilters["TLSD"] === "" || row["TLSD"] === selectedFilters["TLSD"])
             );
         });
 
         populateTable(filteredData);
-        updateFilters(filteredData);
-    }
-
-    // Update Filters Based on Current Data
-    function updateFilters(filteredData) {
-        const filterMap = {
-            "filter-me-name": "ME Name",
-            "filter-beat": "Beat",
-            "filter-shikhar": "Shikhar Onboarding",
-            "filter-launch": "Launch",
-            "filter-dbo": "DBO",
-            "filter-tlsd": "TLSD",
-            "filter-coverage": "Coverage"
-        };
-
-        Object.keys(filterMap).forEach(filterId => {
-            let select = document.getElementById(filterId);
-            if (select) {
-                let currentSelection = select.value;
-                select.innerHTML = `<option value="">${filterMap[filterId]}</option>`; // Keep header as first option
-
-                let uniqueValues = [...new Set(filteredData.map(row => row[filterMap[filterId]]).filter(v => v !== "" && v !== undefined))];
-
-                if (["Coverage", "TLSD"].includes(filterMap[filterId])) {
-                    uniqueValues = uniqueValues.map(Number).sort((a, b) => a - b);
-                }
-
-                uniqueValues.forEach(value => {
-                    let option = document.createElement("option");
-                    option.value = value;
-                    option.textContent = value;
-                    select.appendChild(option);
-                });
-
-                if (currentSelection && uniqueValues.includes(currentSelection)) {
-                    select.value = currentSelection;
-                }
-            }
-        });
     }
 
     // Search Bar Event
     document.getElementById("search-bar").addEventListener("input", applyFilters);
 
-    // Coverage Button Functionality
+    // Filter Button for Coverage < 500
     coverageButton.addEventListener("click", function () {
-        if (!isCoverageFiltered) {
-            let filteredData = jsonData.filter(row => Number(row["Coverage"]) < 500);
-            populateTable(filteredData);
-            updateFilters(filteredData);
-            coverageButton.style.backgroundColor = "green"; // Change button color
-        } else {
-            populateTable(jsonData);
-            populateFilters(jsonData);
-            coverageButton.style.backgroundColor = ""; // Reset button color
-        }
-        isCoverageFiltered = !isCoverageFiltered; // Toggle state
+        let filteredData = jsonData.filter(row => parseInt(row["Coverage"]) < 500);
+        populateTable(filteredData);
+        coverageButton.style.backgroundColor = "green"; // Change color to green
     });
 
-    // Reset Button Functionality
+    // Reset Button
     resetButton.addEventListener("click", function () {
-        document.getElementById("search-bar").value = "";
-        document.querySelectorAll(".filters-container select").forEach(select => select.value = "");
-        populateTable(jsonData);
-        populateFilters(jsonData);
-        coverageButton.style.backgroundColor = ""; // Reset coverage button color
-        isCoverageFiltered = false;
+        if (!isResetClicked) {
+            // First Click: Reset Filters & Search
+            document.getElementById("search-bar").value = "";
+            document.querySelectorAll(".filters-container select").forEach(select => select.value = "");
+            populateTable(jsonData);
+            populateFilters(jsonData);
+            isResetClicked = true;
+        } else {
+            // Second Click: Reset Itself
+            resetButton.style.backgroundColor = "";
+            coverageButton.style.backgroundColor = ""; // Also reset coverage button color
+            isResetClicked = false;
+        }
     });
 });
