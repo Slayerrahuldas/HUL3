@@ -20,9 +20,9 @@ document.addEventListener("DOMContentLoaded", function () {
         tableBody.innerHTML = ""; // Clear existing rows
         data.forEach(row => {
             let tr = document.createElement("tr");
-            Object.values(row).forEach(value => {
+            Object.keys(row).forEach(key => {
                 let td = document.createElement("td");
-                td.textContent = value;
+                td.textContent = row[key];
                 tr.appendChild(td);
             });
             tableBody.appendChild(tr);
@@ -37,7 +37,8 @@ document.addEventListener("DOMContentLoaded", function () {
             "filter-shikhar": "Shikhar Onboarding",
             "filter-launch": "Launch",
             "filter-dbo": "DBO",
-            "filter-tlsd": "TLSD"
+            "filter-tlsd": "TLSD",
+            "filter-coverage": "Coverage"
         };
 
         // Populate each dropdown with unique values
@@ -47,7 +48,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 // Reset dropdown with header as the default option (acts as "All")
                 select.innerHTML = `<option value="">${filters[filterId]}</option>`;
 
-                let uniqueValues = [...new Set(data.map(row => row[filters[filterId]]?.trim()).filter(v => v))];
+                let uniqueValues = [...new Set(data.map(row => row[filters[filterId]]).filter(v => v !== "" && v !== undefined))];
+
+                // Sort numeric values correctly
+                if (["Coverage", "TLSD"].includes(filters[filterId])) {
+                    uniqueValues = uniqueValues.map(Number).sort((a, b) => a - b);
+                }
 
                 uniqueValues.forEach(value => {
                     let option = document.createElement("option");
@@ -71,7 +77,8 @@ document.addEventListener("DOMContentLoaded", function () {
             "Shikhar Onboarding": document.getElementById("filter-shikhar").value.trim(),
             "Launch": document.getElementById("filter-launch").value.trim(),
             "DBO": document.getElementById("filter-dbo").value.trim(),
-            "TLSD": document.getElementById("filter-tlsd").value.trim()
+            "TLSD": document.getElementById("filter-tlsd").value.trim(),
+            "Coverage": document.getElementById("filter-coverage").value.trim()
         };
 
         let filteredData = jsonData.filter(row => {
@@ -84,11 +91,51 @@ document.addEventListener("DOMContentLoaded", function () {
                 (selectedFilters["Shikhar Onboarding"] === "" || row["Shikhar Onboarding"] === selectedFilters["Shikhar Onboarding"]) &&
                 (selectedFilters["Launch"] === "" || row["Launch"] === selectedFilters["Launch"]) &&
                 (selectedFilters["DBO"] === "" || row["DBO"] === selectedFilters["DBO"]) &&
-                (selectedFilters["TLSD"] === "" || row["TLSD"] === selectedFilters["TLSD"])
+                (selectedFilters["TLSD"] === "" || Number(row["TLSD"]) === Number(selectedFilters["TLSD"])) &&
+                (selectedFilters["Coverage"] === "" || Number(row["Coverage"]) === Number(selectedFilters["Coverage"]))
             );
         });
 
         populateTable(filteredData);
+        updateFilters(filteredData);
+    }
+
+    // Update Dropdown Options Based on Filters
+    function updateFilters(filteredData) {
+        const filters = {
+            "filter-me-name": "ME Name",
+            "filter-beat": "Beat",
+            "filter-shikhar": "Shikhar Onboarding",
+            "filter-launch": "Launch",
+            "filter-dbo": "DBO",
+            "filter-tlsd": "TLSD",
+            "filter-coverage": "Coverage"
+        };
+
+        Object.keys(filters).forEach(filterId => {
+            let select = document.getElementById(filterId);
+            if (select) {
+                let selectedValue = select.value;
+                select.innerHTML = `<option value="">${filters[filterId]}</option>`;
+
+                let uniqueValues = [...new Set(filteredData.map(row => row[filters[filterId]]).filter(v => v !== "" && v !== undefined))];
+
+                if (["Coverage", "TLSD"].includes(filters[filterId])) {
+                    uniqueValues = uniqueValues.map(Number).sort((a, b) => a - b);
+                }
+
+                uniqueValues.forEach(value => {
+                    let option = document.createElement("option");
+                    option.value = value;
+                    option.textContent = value;
+                    select.appendChild(option);
+                });
+
+                if (selectedValue && uniqueValues.includes(selectedValue)) {
+                    select.value = selectedValue;
+                }
+            }
+        });
     }
 
     // Search Bar Event
@@ -98,12 +145,14 @@ document.addEventListener("DOMContentLoaded", function () {
     coverageButton.addEventListener("click", function () {
         if (!isCoverageFiltered) {
             // Apply filter: Coverage < 500
-            let filteredData = jsonData.filter(row => parseInt(row["Coverage"]) < 500);
+            let filteredData = jsonData.filter(row => Number(row["Coverage"]) < 500);
             populateTable(filteredData);
+            updateFilters(filteredData);
             coverageButton.style.backgroundColor = "green"; // Change button color
         } else {
             // Reset coverage filter
             populateTable(jsonData);
+            populateFilters(jsonData);
             coverageButton.style.backgroundColor = ""; // Reset button color
         }
         isCoverageFiltered = !isCoverageFiltered; // Toggle state
