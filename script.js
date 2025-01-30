@@ -15,8 +15,14 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Fetch JSON data
     fetch('data.json')
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch the JSON data');
+            }
+            return response.json();
+        })
         .then(jsonData => {
+            console.log('Data loaded:', jsonData);  // Debug: Check if data is loaded correctly
             data = jsonData;
             populateFilters();
             renderTable();
@@ -57,9 +63,16 @@ document.addEventListener("DOMContentLoaded", function() {
     function renderTable() {
         tableBody.innerHTML = '';
         const searchTerm = searchBar.value.toLowerCase();
+        console.log('Search term:', searchTerm);  // Debug: Check the search term
 
         data.filter(row => {
-            return (row['HUL Code'].toLowerCase().includes(searchTerm) || row['HUL Outlet Name'].toLowerCase().includes(searchTerm)) &&
+            const hulCode = row['HUL Code'] ? row['HUL Code'].toLowerCase() : '';
+            const outletName = row['HUL Outlet Name'] ? row['HUL Outlet Name'].toLowerCase() : '';
+
+            // Debug: Check if the row is being filtered correctly
+            console.log('Row:', hulCode, outletName);
+
+            return (hulCode.includes(searchTerm) || outletName.includes(searchTerm)) &&
                 (filters.meName.value === '' || row['ME Name'] === filters.meName.value) &&
                 (filters.beat.value === '' || row['Beat'] === filters.beat.value) &&
                 (filters.shikhar.value === '' || row['Shikhar Onboarding'] === filters.shikhar.value) &&
@@ -85,16 +98,8 @@ document.addEventListener("DOMContentLoaded", function() {
         renderTable();
     });
 
-    // Search Bar Filter
-    const searchQuery = document.getElementById("search-bar").value.toLowerCase();
-    if (searchQuery) {
-        filteredData = filteredData.filter((row) => {
-            return (
-                row["HUL Code"].toLowerCase().includes(searchQuery) ||
-                row["HUL Outlet Name"].toLowerCase().includes(searchQuery)
-            );
-        });
-    }
+    // Search bar listener
+    searchBar.addEventListener('input', renderTable);
 
     // Dropdown filters listener
     Object.values(filters).forEach(filter => {
