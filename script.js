@@ -60,9 +60,12 @@ function applyFilters() {
     }
 
     // Filter Button Logic
-    if (filterButton1Active) {
-        filteredData = filteredData.filter(row => Number(row["Coverage"]) < 500);
-    }
+if (filterButton1Active) {
+    filteredData = filteredData.filter(row => {
+        const coverageValue = parseFloat(row["Coverage"]); // Convert to a number
+        return !isNaN(coverageValue) && coverageValue < 500; // Check if it's less than 500
+    });
+}
 
     // Update the table with the filtered data
     populateTable(filteredData);
