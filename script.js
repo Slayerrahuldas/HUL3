@@ -5,7 +5,7 @@ let jsonData = []; // Global variable to hold fetched JSON data
 // Function to fetch data from JSON file
 async function fetchData() {
     try {
-        const response = await fetch("data.json"); // Replace 'data.json' with your JSON file's path
+        const response = await fetch("data.json"); // Replace with your JSON file's path
         if (!response.ok) throw new Error("Failed to fetch data.");
         jsonData = await response.json();
         initialize(); // Populate the table and filters after fetching data
@@ -19,87 +19,80 @@ function populateTable(data) {
     const tableBody = document.getElementById("table-body");
     tableBody.innerHTML = ""; // Clear existing data
 
-    data.forEach((item) => {
+    data.forEach(item => {
         const row = document.createElement("tr");
-        for (const key in item) {
+        Object.values(item).forEach(value => {
             const cell = document.createElement("td");
-            cell.textContent = item[key];
+            cell.textContent = value;
             row.appendChild(cell);
-        }
+        });
         tableBody.appendChild(row);
     });
 }
 
-// Function to apply all filters and update the table and dropdowns
+// Function to apply all filters and update the table
 function applyFilters() {
     let filteredData = [...jsonData]; // Start with the original data
 
     // Get dropdown filter values
-    const filterMeName = document.getElementById("filter-me-name").value;
-    const filterBeat = document.getElementById("filter-beat").value;
-    const filterShikhar = document.getElementById("filter-shikhar").value;
-    const filterLaunch = document.getElementById("filter-launch").value;
-    const filterDBO = document.getElementById("filter-dbo").value;
-    const filterTLSD = document.getElementById("filter-tlsd").value;
+    const filterValues = {
+        "ME Name": document.getElementById("filter-me-name").value,
+        "Beat": document.getElementById("filter-beat").value,
+        "Shikhar": document.getElementById("filter-shikhar").value,
+        "Launch": document.getElementById("filter-launch").value,
+        "DBO": document.getElementById("filter-dbo").value,
+        "TLSD": document.getElementById("filter-tlsd").value
+    };
 
     // Apply dropdown filters
-    if (filterMeName) filteredData = filteredData.filter(row => row["ME Name"] === filterMeName);
-    if (filterBeat) filteredData = filteredData.filter(row => row["Beat"] === filterBeat);
-    if (filterShikhar) filteredData = filteredData.filter(row => row["Shikhar"] === filterShikhar);
-    if (filterLaunch) filteredData = filteredData.filter(row => row["Launch"] === filterLaunch);
-    if (filterDBO) filteredData = filteredData.filter(row => row["DBO"] === filterDBO);
-    if (filterTLSD) filteredData = filteredData.filter(row => row["TLSD"] === filterTLSD);
+    Object.keys(filterValues).forEach(key => {
+        if (filterValues[key]) {
+            filteredData = filteredData.filter(row => row[key] === filterValues[key]);
+        }
+    });
 
     // Search Bar Filter
     const searchQuery = document.getElementById("search-bar").value.toLowerCase();
     if (searchQuery) {
-        filteredData = filteredData.filter(row =>
-            row["HUL Code"].toLowerCase().includes(searchQuery) ||
-            row["HUL Outlet Name"].toLowerCase().includes(searchQuery)
-        );
+        filteredData = filteredData.filter(row => {
+            const hulCode = row["HUL Code"] ? row["HUL Code"].toString().toLowerCase() : "";
+            const outletName = row["HUL Outlet Name"] ? row["HUL Outlet Name"].toString().toLowerCase() : "";
+            return hulCode.includes(searchQuery) || outletName.includes(searchQuery);
+        });
     }
 
     // Filter Button Logic
-if (filterButton1Active) {
-    filteredData = filteredData.filter(row => {
-        const coverageValue = parseFloat(row["Coverage"]); // Convert to a number
-        return !isNaN(coverageValue) && coverageValue < 500; // Check if it's less than 500
-    });
-}
+    if (filterButton1Active) {
+        filteredData = filteredData.filter(row => Number(row["Coverage"]) < 500);
+    }
 
     // Update the table with the filtered data
     populateTable(filteredData);
-
-    // Dynamically update dropdown options based on filtered data
     updateDropdowns(filteredData);
 }
 
 // Function to dynamically update dropdown options
 function updateDropdowns(filteredData) {
-    const MeNames = new Set();
-    const Beats = new Set();
-    const Shikhar = new Set();
-    const Launch = new Set();
-    const DBO = new Set();
-    const TLSD = new Set();
+    const uniqueValues = {
+        "ME Name": new Set(),
+        "Beat": new Set(),
+        "Shikhar": new Set(),
+        "Launch": new Set(),
+        "DBO": new Set(),
+        "TLSD": new Set()
+    };
 
     // Collect unique options from filtered data
     filteredData.forEach(row => {
-        if (row["ME Name"]) MeNames.add(row["ME Name"]);
-        if (row["Beat"]) Beats.add(row["Beat"]);
-        if (row["Shikhar"]) Shikhar.add(row["Shikhar"]);
-        if (row["Launch"]) Launch.add(row["Launch"]);
-        if (row["DBO"]) DBO.add(row["DBO"]);
-        if (row["TLSD"]) TLSD.add(row["TLSD"]);
+        Object.keys(uniqueValues).forEach(key => {
+            if (row[key]) uniqueValues[key].add(row[key]);
+        });
     });
 
     // Repopulate dropdowns with updated options
-    populateSelectDropdown("filter-me-name", MeNames, "ME Name");
-    populateSelectDropdown("filter-beat", Beats, "Beat");
-    populateSelectDropdown("filter-shikhar", Shikhar, "Shikhar");
-    populateSelectDropdown("filter-launch", Launch, "Launch");
-    populateSelectDropdown("filter-dbo", DBO, "DBO");
-    populateSelectDropdown("filter-tlsd", TLSD, "TLSD");
+    Object.keys(uniqueValues).forEach(key => {
+        populateSelectDropdown(`filter-${key.toLowerCase().replace(" ", "-")}`, uniqueValues[key], key);
+    });
 }
 
 // Function to populate dropdown filters
@@ -108,11 +101,11 @@ function populateSelectDropdown(id, optionsSet, columnName) {
     const selectedValue = dropdown.value; // Keep the current selection
     dropdown.innerHTML = ""; // Clear existing options
 
-    // Add the column name as the default option
+    // Add default option
     const defaultOption = document.createElement("option");
-    defaultOption.textContent = columnName; // Use column name as the placeholder
-    defaultOption.value = ""; // Set empty value to ignore this selection in filters
-    defaultOption.selected = true; // Make it the default selected option
+    defaultOption.textContent = columnName;
+    defaultOption.value = "";
+    defaultOption.selected = true;
     dropdown.appendChild(defaultOption);
 
     // Populate other options
@@ -127,20 +120,14 @@ function populateSelectDropdown(id, optionsSet, columnName) {
 
 // Reset button functionality
 document.getElementById("reset-button").addEventListener("click", () => {
-    // Reset filter button states
     filterButton1Active = false;
     document.getElementById("filter-button-1").style.backgroundColor = "blue";
 
     // Reset search bar
     document.getElementById("search-bar").value = "";
 
-    // Reset dropdown filters to default
-    document.getElementById("filter-me-name").value = "";
-    document.getElementById("filter-beat").value = "";
-    document.getElementById("filter-shikhar").value = "";
-    document.getElementById("filter-launch").value = "";
-    document.getElementById("filter-dbo").value = "";
-    document.getElementById("filter-tlsd").value = "";
+    // Reset dropdown filters
+    document.querySelectorAll("select").forEach(select => select.value = "");
 
     // Reapply filters to show the unfiltered data
     applyFilters();
@@ -148,18 +135,13 @@ document.getElementById("reset-button").addEventListener("click", () => {
 
 // Event listeners for dropdowns and search bar
 document.getElementById("search-bar").addEventListener("input", applyFilters);
-document.getElementById("filter-me-name").addEventListener("change", applyFilters);
-document.getElementById("filter-beat").addEventListener("change", applyFilters);
-document.getElementById("filter-shikhar").addEventListener("change", applyFilters);
-document.getElementById("filter-launch").addEventListener("change", applyFilters);
-document.getElementById("filter-dbo").addEventListener("change", applyFilters);
-document.getElementById("filter-tlsd").addEventListener("change", applyFilters);
+document.querySelectorAll("select").forEach(select => select.addEventListener("change", applyFilters));
 
 // Filter button event listeners
 document.getElementById("filter-button-1").addEventListener("click", () => {
     filterButton1Active = !filterButton1Active;
     document.getElementById("filter-button-1").style.backgroundColor = filterButton1Active ? "green" : "blue";
-    applyFilters(); // Reapply all filters
+    applyFilters();
 });
 
 // Initialize the table and filters
