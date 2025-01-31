@@ -1,4 +1,4 @@
-/ Track the state of filter buttons
+// Track the state of filter buttons
 let filterButton1Active = false;
 let jsonData = []; // Global variable to hold fetched JSON data
 
@@ -18,8 +18,8 @@ async function fetchData() {
 function populateTable(data) {
     const tableBody = document.getElementById("table-body");
     tableBody.innerHTML = ""; // Clear existing data
-	
-	data.forEach((item) => {
+
+    data.forEach((item) => {
         const row = document.createElement("tr");
         for (const key in item) {
             const cell = document.createElement("td");
@@ -33,52 +33,38 @@ function populateTable(data) {
 // Function to apply all filters and update the table and dropdowns
 function applyFilters() {
     let filteredData = [...jsonData]; // Start with the original data
-	
-	// Get dropdown filter values
+
+    // Get dropdown filter values
     const filterMeName = document.getElementById("filter-me-name").value;
     const filterBeat = document.getElementById("filter-beat").value;
     const filterShikhar = document.getElementById("filter-shikhar").value;
     const filterLaunch = document.getElementById("filter-launch").value;
     const filterDBO = document.getElementById("filter-dbo").value;
     const filterTLSD = document.getElementById("filter-tlsd").value;
-	
-	// Apply dropdown filters
-    if (filterMeName !== "") {
-        filteredData = filteredData.filter((row) => row["ME Name"] === filterMeName);
-    }
-    if (filterBeat !== "") {
-        filteredData = filteredData.filter((row) => row["Beat"] === filterBeat);
-    }
-    if (filterShikhar !== "") {
-        filteredData = filteredData.filter((row) => row["Shikhar"] === filterShikhar);
-    }
-    if (filterLaunch !== "") {
-        filteredData = filteredData.filter((row) => row["Launch"] === filterLaunch);
-    }
-	if (filterDBO !== "") {
-        filteredData = filteredData.filter((row) => row["DBO"] === filterDBO);
-    }
-	if (filterTLSD !== "") {
-        filteredData = filteredData.filter((row) => row["TLSD"] === filterTLSD);
-    }
-	
-	// Search Bar Filter
+
+    // Apply dropdown filters
+    if (filterMeName) filteredData = filteredData.filter(row => row["ME Name"] === filterMeName);
+    if (filterBeat) filteredData = filteredData.filter(row => row["Beat"] === filterBeat);
+    if (filterShikhar) filteredData = filteredData.filter(row => row["Shikhar"] === filterShikhar);
+    if (filterLaunch) filteredData = filteredData.filter(row => row["Launch"] === filterLaunch);
+    if (filterDBO) filteredData = filteredData.filter(row => row["DBO"] === filterDBO);
+    if (filterTLSD) filteredData = filteredData.filter(row => row["TLSD"] === filterTLSD);
+
+    // Search Bar Filter
     const searchQuery = document.getElementById("search-bar").value.toLowerCase();
     if (searchQuery) {
-        filteredData = filteredData.filter((row) => {
-            return (
-                row["HUL Code"].toLowerCase().includes(searchQuery) ||
-                row["HUL Outlet Name"].toLowerCase().includes(searchQuery)
-            );
-        });
+        filteredData = filteredData.filter(row =>
+            row["HUL Code"].toLowerCase().includes(searchQuery) ||
+            row["HUL Outlet Name"].toLowerCase().includes(searchQuery)
+        );
     }
-	
-	// Filter Button Logic
+
+    // Filter Button Logic
     if (filterButton1Active) {
-        filteredData = filteredData.filter((row) => row["Coverage"] < 500);
+        filteredData = filteredData.filter(row => Number(row["Coverage"]) < 500);
     }
-	
-	// Update the table with the filtered data
+
+    // Update the table with the filtered data
     populateTable(filteredData);
 
     // Dynamically update dropdown options based on filtered data
@@ -95,22 +81,22 @@ function updateDropdowns(filteredData) {
     const TLSD = new Set();
 
     // Collect unique options from filtered data
-    filteredData.forEach((row) => {
-        if (row["ME Name"]) detsMeNames.add(row["ME Name"]);
-        if (row["Beat"]) detsBeats.add(row["Beat"]);
-        if (row["Shikhar"]) fnrMeNames.add(row["Shikhar"]);
-        if (row["Launch"]) fnrBeats.add(row["Launch"]);
-	if (row["DBO"]) fnrBeats.add(row["DBO"]);
-	if (row["TLSD"]) fnrBeats.add(row["TLSD"]);
+    filteredData.forEach(row => {
+        if (row["ME Name"]) MeNames.add(row["ME Name"]);
+        if (row["Beat"]) Beats.add(row["Beat"]);
+        if (row["Shikhar"]) Shikhar.add(row["Shikhar"]);
+        if (row["Launch"]) Launch.add(row["Launch"]);
+        if (row["DBO"]) DBO.add(row["DBO"]);
+        if (row["TLSD"]) TLSD.add(row["TLSD"]);
     });
 
     // Repopulate dropdowns with updated options
-    populateSelectDropdown("filter-me-name", detsMeNames, "ME Name");
-    populateSelectDropdown("filter-beat", detsBeats, "Beat");
-    populateSelectDropdown("filter-launch", fnrMeNames, "Launch");
-    populateSelectDropdown("filter-shikhar", fnrBeats, "Shikhar");
-    populateSelectDropdown("filter-dbo", fnrBeats, "DBO");
-    populateSelectDropdown("filter-tlsd", fnrBeats, "TLSD");
+    populateSelectDropdown("filter-me-name", MeNames, "ME Name");
+    populateSelectDropdown("filter-beat", Beats, "Beat");
+    populateSelectDropdown("filter-shikhar", Shikhar, "Shikhar");
+    populateSelectDropdown("filter-launch", Launch, "Launch");
+    populateSelectDropdown("filter-dbo", DBO, "DBO");
+    populateSelectDropdown("filter-tlsd", TLSD, "TLSD");
 }
 
 // Function to populate dropdown filters
@@ -127,7 +113,7 @@ function populateSelectDropdown(id, optionsSet, columnName) {
     dropdown.appendChild(defaultOption);
 
     // Populate other options
-    optionsSet.forEach((option) => {
+    optionsSet.forEach(option => {
         const optionElement = document.createElement("option");
         optionElement.textContent = option;
         optionElement.value = option;
@@ -141,17 +127,17 @@ document.getElementById("reset-button").addEventListener("click", () => {
     // Reset filter button states
     filterButton1Active = false;
     document.getElementById("filter-button-1").style.backgroundColor = "blue";
-	
-	// Reset search bar
+
+    // Reset search bar
     document.getElementById("search-bar").value = "";
 
     // Reset dropdown filters to default
-    document.getElementById("filter-me-name").selectedIndex = 0;
-    document.getElementById("filter-beat").selectedIndex = 0;
-    document.getElementById("filter-shikhar").selectedIndex = 0;
-    document.getElementById("filter-launch").selectedIndex = 0;
-    document.getElementById("filter-dbo").selectedIndex = 0;
-    document.getElementById("filter-tlsd").selectedIndex = 0;
+    document.getElementById("filter-me-name").value = "";
+    document.getElementById("filter-beat").value = "";
+    document.getElementById("filter-shikhar").value = "";
+    document.getElementById("filter-launch").value = "";
+    document.getElementById("filter-dbo").value = "";
+    document.getElementById("filter-tlsd").value = "";
 
     // Reapply filters to show the unfiltered data
     applyFilters();
