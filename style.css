@@ -60,8 +60,9 @@ h1 {
 
 .buttons-container {
     display: flex;
-    justify-content: center;
+    justify-content: space-between; /* Ensures buttons are apart */
     margin-bottom: 20px;
+    padding: 0 10px;
 }
 
 button {
@@ -71,6 +72,10 @@ button {
     color: white;
     border-radius: 4px;
     cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
 }
 
 button:hover {
