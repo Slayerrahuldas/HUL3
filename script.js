@@ -6,6 +6,7 @@ async function fetchData() {
         const response = await fetch("data.json"); 
         if (!response.ok) throw new Error("Failed to fetch data.");
         jsonData = await response.json();
+        populateFilters();
         initialize();
     } catch (error) {
         console.error("Error fetching data:", error);
@@ -26,9 +27,27 @@ function populateTable(data) {
     });
 }
 
+function populateFilters() {
+    const filterKeys = [
+        "ME Name", "Beat", "Simple", "GLUTA", "Sun Range",
+        "Elle18 Lqd Lip", "Lakme FMatte Foundation",
+        "Elle18 Nail", "Liner Qdel", "Hair Serum"
+    ];
+
+    filterKeys.forEach(key => {
+        const filterElement = document.getElementById(`filter-${key.toLowerCase().replace(/\s+/g, "-")}`);
+        if (filterElement) {
+            let uniqueValues = [...new Set(jsonData.map(item => item[key]).filter(Boolean))];
+            filterElement.innerHTML = `<option value="">All</option>` + 
+                uniqueValues.map(value => `<option value="${value}">${value}</option>`).join("");
+        }
+    });
+}
+
 function applyFilters() {
     let filteredData = [...jsonData];
-    const filterValues = {
+    
+    const filterKeys = {
         "ME Name": document.getElementById("filter-me-name").value,
         "Beat": document.getElementById("filter-beat").value,
         "Simple": document.getElementById("filter-simple").value,
@@ -41,18 +60,18 @@ function applyFilters() {
         "Hair Serum": document.getElementById("filter-hair-serum").value
     };
 
-    Object.keys(filterValues).forEach(key => {
-        if (filterValues[key]) {
-            filteredData = filteredData.filter(row => row[key] === filterValues[key]);
+    Object.keys(filterKeys).forEach(key => {
+        if (filterKeys[key]) {
+            filteredData = filteredData.filter(row => row[key] === filterKeys[key]);
         }
     });
 
     const searchQuery = document.getElementById("search-bar").value.toLowerCase();
     if (searchQuery) {
-        filteredData = filteredData.filter(row => {
-            return row["HUL Code"].toLowerCase().includes(searchQuery) ||
-                   row["HUL Outlet Name"].toLowerCase().includes(searchQuery);
-        });
+        filteredData = filteredData.filter(row => 
+            row["HUL Code"].toLowerCase().includes(searchQuery) || 
+            row["HUL Outlet Name"].toLowerCase().includes(searchQuery)
+        );
     }
 
     if (filterButton1Active) {
