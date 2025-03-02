@@ -6,6 +6,7 @@ async function fetchData() {
         const response = await fetch("data.json");
         if (!response.ok) throw new Error("Failed to fetch data.");
         jsonData = await response.json();
+        console.log("Fetched Data:", jsonData); // Debugging Log
         populateFilters();
         initialize();
     } catch (error) {
@@ -45,6 +46,7 @@ function populateFilters() {
         const filterElement = document.getElementById(id);
         if (filterElement) {
             let uniqueValues = [...new Set(jsonData.map(item => item[key]).filter(Boolean))];
+            console.log(`Values for ${key}:`, uniqueValues); // Debugging Log
             filterElement.innerHTML = `<option value="">${key}</option>` + 
                 uniqueValues.map(value => `<option value="${value}">${value}</option>`).join("");
         }
@@ -72,6 +74,8 @@ function applyFilters() {
             filteredData = filteredData.filter(row => row[key] === filterKeys[key]);
         }
     });
+
+    console.log("Filtered Data:", filteredData); // Debugging Log
 
     const searchQuery = document.getElementById("search-bar").value.toLowerCase();
     if (searchQuery) {
