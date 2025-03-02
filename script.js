@@ -1,9 +1,9 @@
 let filterButton1Active = false;
-let jsonData = []; 
+let jsonData = [];
 
 async function fetchData() {
     try {
-        const response = await fetch("data.json"); 
+        const response = await fetch("data.json");
         if (!response.ok) throw new Error("Failed to fetch data.");
         jsonData = await response.json();
         populateFilters();
@@ -28,17 +28,24 @@ function populateTable(data) {
 }
 
 function populateFilters() {
-    const filterKeys = [
-        "ME Name", "Beat", "Simple", "GLUTA", "Sun Range",
-        "Elle18 Lqd Lip", "Lakme FMatte Foundation",
-        "Elle18 Nail", "Liner Qdel", "Hair Serum"
-    ];
+    const filterKeys = {
+        "ME Name": "filter-me-name",
+        "Beat": "filter-beat",
+        "Simple": "filter-simple",
+        "GLUTA": "filter-gluta",
+        "Sun Range": "filter-sun-range",
+        "Elle18 Lqd Lip": "filter-elle18-lqd-lip",
+        "Lakme FMatte Foundation": "filter-lakme-fmatte-foundation",
+        "Elle18 Nail": "filter-elle18-nail",
+        "Liner Qdel": "filter-liner-qdel",
+        "Hair Serum": "filter-hair-serum"
+    };
 
-    filterKeys.forEach(key => {
-        const filterElement = document.getElementById(`filter-${key.toLowerCase().replace(/\s+/g, "-")}`);
+    Object.entries(filterKeys).forEach(([key, id]) => {
+        const filterElement = document.getElementById(id);
         if (filterElement) {
             let uniqueValues = [...new Set(jsonData.map(item => item[key]).filter(Boolean))];
-            filterElement.innerHTML = `<option value="">All</option>` + 
+            filterElement.innerHTML = `<option value="">${key}</option>` + 
                 uniqueValues.map(value => `<option value="${value}">${value}</option>`).join("");
         }
     });
@@ -46,7 +53,7 @@ function populateFilters() {
 
 function applyFilters() {
     let filteredData = [...jsonData];
-    
+
     const filterKeys = {
         "ME Name": document.getElementById("filter-me-name").value,
         "Beat": document.getElementById("filter-beat").value,
@@ -77,7 +84,7 @@ function applyFilters() {
     if (filterButton1Active) {
         filteredData = filteredData.filter(row => Number(row["Coverage"]) < 500);
     }
-    
+
     populateTable(filteredData);
 }
 
