@@ -16,36 +16,31 @@
             <input type="text" id="search-bar" placeholder="Search by HUL Code or Outlet Name">
         </div>
 
-        <!-- Filters -->
+        <!-- First Row of Filters (ME Name & Beat) -->
         <div class="filters-container">
-            <!-- ME & Beat Section -->
-            <div class="filter-section">ME & Beat</div>
-            <div class="filter-content">
-                <select id="filter-me-name"><option value="">ME Name</option></select>
-                <select id="filter-beat"><option value="">Beat</option></select>
-            </div>
-
-            <!-- Other Filters Section -->
-            <div class="filter-section">Other Filters</div>
-            <div class="filter-content">
-                <select id="filter-simple"><option value="">Simple</option></select>
-                <select id="filter-gluta"><option value="">GLUTA</option></select>
-                <select id="filter-sun-range"><option value="">Sun Range</option></select>
-                <select id="filter-elle18-lqd-lip"><option value="">Elle18 Lqd Lip</option></select>
-                <select id="filter-lakme-fmatte-foundation"><option value="">Lakme FMatte Foundation</option></select>
-                <select id="filter-elle18-nail"><option value="">Elle18 Nail</option></select>
-                <select id="filter-liner-qdel"><option value="">Liner Qdel</option></select>
-                <select id="filter-hair-serum"><option value="">Hair Serum</option></select>
-            </div>
+            <select id="filter-me-name"><option value="">ME Name</option></select>
+            <select id="filter-beat"><option value="">Beat</option></select>
         </div>
 
-        <!-- Buttons -->
+        <!-- Second Row of Filters -->
+        <div class="filters-container">
+            <select id="filter-simple"><option value="">Simple</option></select>
+            <select id="filter-gluta"><option value="">GLUTA</option></select>
+            <select id="filter-sun-range"><option value="">Sun Range</option></select>
+            <select id="filter-elle18-lqd-lip"><option value="">Elle18 Lqd Lip</option></select>
+            <select id="filter-lakme-fmatte-foundation"><option value="">Lakme FMatte Foundation</option></select>
+            <select id="filter-elle18-nail"><option value="">Elle18 Nail</option></select>
+            <select id="filter-liner-qdel"><option value="">Liner Qdel</option></select>
+            <select id="filter-hair-serum"><option value="">Hair Serum</option></select>
+        </div>
+
+        <!-- Buttons for Filtering -->
         <div class="buttons-container">
             <button id="filter-button-1">Coverage < 500</button>
             <button id="reset-button">Reset Filters</button>
         </div>
 
-        <!-- Data Table -->
+        <!-- Table -->
         <table id="data-table">
             <thead>
                 <tr>
@@ -70,6 +65,7 @@
         </table>
     </div>
 
+    <!-- Link to JavaScript -->
     <script src="script.js"></script>
 </body>
 </html>
