@@ -1,7 +1,6 @@
 let filterButton1Active = false;
 let jsonData = [];
 
-// Fetch data from JSON
 async function fetchData() {
     try {
         const response = await fetch("data.json");
@@ -13,7 +12,6 @@ async function fetchData() {
     }
 }
 
-// Populate table with data
 function populateTable(data) {
     const tableBody = document.getElementById("table-body");
     tableBody.innerHTML = "";
@@ -28,7 +26,6 @@ function populateTable(data) {
     });
 }
 
-// Apply filters
 function applyFilters() {
     let filteredData = [...jsonData];
 
@@ -45,54 +42,21 @@ function applyFilters() {
         "Hair Serum": document.getElementById("filter-hair-serum").value
     };
 
-    // Apply each filter
     Object.keys(filterValues).forEach(key => {
         if (filterValues[key]) {
             filteredData = filteredData.filter(row => row[key] === filterValues[key]);
         }
     });
 
-    // Apply search filter
-    const searchQuery = document.getElementById("search-bar").value.toLowerCase();
-    if (searchQuery) {
-        filteredData = filteredData.filter(row =>
-            row["HUL Code"].toLowerCase().includes(searchQuery) ||
-            row["HUL Outlet Name"].toLowerCase().includes(searchQuery)
-        );
-    }
-
-    // Apply Coverage < 500 filter
-    if (filterButton1Active) {
-        filteredData = filteredData.filter(row => Number(row["Coverage"]) < 500);
-    }
-
     populateTable(filteredData);
 }
 
-// Reset Filters
 document.getElementById("reset-button").addEventListener("click", () => {
-    filterButton1Active = false;
-    document.getElementById("filter-button-1").style.backgroundColor = "blue";
     document.getElementById("search-bar").value = "";
     document.querySelectorAll("select").forEach(select => select.value = "");
     applyFilters();
 });
 
-// Apply filters on input change
-document.getElementById("search-bar").addEventListener("input", applyFilters);
 document.querySelectorAll("select").forEach(select => select.addEventListener("change", applyFilters));
-
-// Toggle Coverage < 500 Filter
-document.getElementById("filter-button-1").addEventListener("click", () => {
-    filterButton1Active = !filterButton1Active;
-    document.getElementById("filter-button-1").style.backgroundColor = filterButton1Active ? "green" : "blue";
-    applyFilters();
-});
-
-// Initialize table with data
-function initialize() {
-    populateTable(jsonData);
-    applyFilters();
-}
 
 fetchData();
