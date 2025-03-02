@@ -33,7 +33,7 @@ h1 {
     border-radius: 4px;
 }
 
-/* Filters Container */
+/* Filters */
 .filters-container {
     display: flex;
     flex-direction: column;
@@ -41,25 +41,43 @@ h1 {
     margin-bottom: 20px;
 }
 
-/* First Row: ME Name & Beat */
-.filter-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
+/* Filter Headers */
+.filter-section {
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    border-radius: 5px;
+    user-select: none;
+}
+
+.filter-section:hover {
+    background-color: #0056b3;
+}
+
+/* Hide Dropdowns Initially */
+.filter-content {
+    display: none;
+    padding: 10px;
+    background: #f4f4f4;
+    border-radius: 5px;
 }
 
 /* Dropdown Styling */
-.filter-row select {
+.filter-content select {
+    width: 100%;
     padding: 10px;
     font-size: 16px;
     border: 1px solid #ddd;
     border-radius: 4px;
     background-color: white;
-    min-width: 150px;
+    margin-bottom: 10px;
 }
 
-/* Buttons Container */
+/* Buttons */
 .buttons-container {
     display: flex;
     justify-content: center;
@@ -103,11 +121,6 @@ table th {
 @media screen and (max-width: 768px) {
     #search-bar {
         width: 80%;
-    }
-
-    .filter-row {
-        flex-direction: column;
-        align-items: center;
     }
 
     .buttons-container {
