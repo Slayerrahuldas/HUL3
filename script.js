@@ -95,14 +95,4 @@ function initialize() {
     applyFilters();
 }
 
-// Toggle Filter Sections on Click
-document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll(".filter-section").forEach(section => {
-        section.addEventListener("click", function () {
-            const content = this.nextElementSibling;
-            content.style.display = content.style.display === "none" || content.style.display === "" ? "block" : "none";
-        });
-    });
-});
-
 fetchData();
