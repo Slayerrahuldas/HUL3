@@ -16,16 +16,18 @@
             <input type="text" id="search-bar" placeholder="Search by HUL Code or Outlet Name">
         </div>
 
-        <!-- Dropdown Filters -->
+        <!-- Filters -->
         <div class="filters-container">
-            <!-- First Row: ME Name & Beat -->
-            <div class="filter-row">
+            <!-- ME & Beat Section -->
+            <div class="filter-section">ME & Beat</div>
+            <div class="filter-content">
                 <select id="filter-me-name"><option value="">ME Name</option></select>
                 <select id="filter-beat"><option value="">Beat</option></select>
             </div>
 
-            <!-- Second Row: Remaining Filters -->
-            <div class="filter-row">
+            <!-- Other Filters Section -->
+            <div class="filter-section">Other Filters</div>
+            <div class="filter-content">
                 <select id="filter-simple"><option value="">Simple</option></select>
                 <select id="filter-gluta"><option value="">GLUTA</option></select>
                 <select id="filter-sun-range"><option value="">Sun Range</option></select>
@@ -37,13 +39,13 @@
             </div>
         </div>
 
-        <!-- Buttons for Filtering -->
+        <!-- Buttons -->
         <div class="buttons-container">
             <button id="filter-button-1">Coverage < 500</button>
             <button id="reset-button">Reset Filters</button>
         </div>
 
-        <!-- Table -->
+        <!-- Data Table -->
         <table id="data-table">
             <thead>
                 <tr>
@@ -68,7 +70,6 @@
         </table>
     </div>
 
-    <!-- Link to JavaScript -->
     <script src="script.js"></script>
 </body>
 </html>
