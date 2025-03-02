@@ -32,7 +32,7 @@ h1 {
     border-radius: 4px;
 }
 
-.filters-container {
+.filters-row {
     display: flex;
     justify-content: center;
     gap: 10px;
@@ -40,7 +40,18 @@ h1 {
     flex-wrap: wrap;
 }
 
-.filters-container select {
+/* Two columns for ME Name & Beat */
+.filter-column-2 {
+    width: 48%;
+}
+
+/* Seven columns for the rest */
+.filter-column-7 {
+    width: 13%;
+}
+
+.filters-row select {
+    width: 100%;
     padding: 10px;
     font-size: 16px;
     border: 1px solid #ddd;
@@ -60,4 +71,25 @@ button {
     color: white;
     border-radius: 4px;
     cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table th, table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
 }
