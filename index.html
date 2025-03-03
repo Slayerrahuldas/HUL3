@@ -1,88 +1,114 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HUL3 Dashboard</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="container">
-        <h1>Colours Weekly Update Dashboard</h1>
+document.addEventListener("DOMContentLoaded", function () {
+    fetchData();
+});
 
-        <!-- Search Bar -->
-        <div class="search-bar-container">
-            <input type="text" id="search-bar" placeholder="Search by HUL Code or Outlet Name">
-        </div>
+let jsonData = [];
+let filterButton1Active = false;
 
-        <!-- First Row: ME Name & Beat (2 Columns) -->
-        <div class="filters-row">
-            <div class="filter-column-2">
-                <select id="filter-me-name"><option value="">ME Name</option></select>
-            </div>
-            <div class="filter-column-2">
-                <select id="filter-beat"><option value="">Beat</option></select>
-            </div>
-        </div>
+async function fetchData() {
+    try {
+        const response = await fetch("data.json"); // Ensure your JSON file is accessible
+        jsonData = await response.json();
+        console.log("Fetched Data:", jsonData); // Debugging Log
+        populateFilters();
+        populateTable(jsonData);
+    } catch (error) {
+        console.error("Error fetching data:", error);
+    }
+}
 
-        <!-- Second Row: Other Filters (7 Columns) -->
-        <div class="filters-row">
-            <div class="filter-column-7">
-                <select id="filter-simple"><option value="">Simple</option></select>
-            </div>
-            <div class="filter-column-7">
-                <select id="filter-gluta"><option value="">GLUTA</option></select>
-            </div>
-            <div class="filter-column-7">
-                <select id="filter-sun-range"><option value="">Sun Range</option></select>
-            </div>
-            <div class="filter-column-7">
-                <select id="filter-elle18-lqd-lip"><option value="">Elle18 Lqd Lip</option></select>
-            </div>
-            <div class="filter-column-7">
-                <select id="filter-lakme-fmatte-foundation"><option value="">Lakme FMatte Foundation</option></select>
-            </div>
-            <div class="filter-column-7">
-                <select id="filter-elle18-nail"><option value="">Elle18 Nail</option></select>
-            </div>
-            <div class="filter-column-7">
-                <select id="filter-liner-qdel"><option value="">Liner Qdel</option></select>
-            </div>
-        </div>
+function populateTable(data) {
+    const tableBody = document.getElementById("table-body");
+    tableBody.innerHTML = "";
 
-        <!-- Buttons for Filtering -->
-        <div class="buttons-container">
-            <button id="filter-button-1">Coverage < 500</button>
-            <button id="reset-button">Reset Filters</button>
-        </div>
+    data.forEach(row => {
+        const tr = document.createElement("tr");
+        Object.values(row).forEach(value => {
+            const td = document.createElement("td");
+            td.textContent = value;
+            tr.appendChild(td);
+        });
+        tableBody.appendChild(tr);
+    });
+}
 
-        <!-- Table -->
-        <table id="data-table">
-            <thead>
-                <tr>
-                    <th>HUL Code</th>
-                    <th>HUL Outlet Name</th>
-                    <th>ME Name</th>
-                    <th>Beat</th>
-                    <th>Coverage</th>
-                    <th>Simple</th>
-                    <th>GLUTA</th>
-                    <th>Sun Range</th>
-                    <th>Elle18 Lqd Lip</th>
-                    <th>Lakme FMatte Foundation</th>
-                    <th>Elle18 Nail</th>
-                    <th>Liner Qdel</th>
-                    <th>Hair Serum</th>
-                </tr>
-            </thead>
-            <tbody id="table-body">
-                <!-- Data will be dynamically populated here -->
-            </tbody>
-        </table>
-    </div>
+function populateFilters() {
+    const filterKeys = {
+        "ME Name": "filter-me-name",
+        "Beat": "filter-beat",
+        "Simple": "filter-simple",
+        "GLUTA": "filter-gluta",
+        "Sun Range": "filter-sun-range",
+        "Elle18 Lqd Lip": "filter-elle18-lqd-lip",
+        "Lakme FMatte Foundation": "filter-lakme-fmatte-foundation",
+        "Elle18 Nail": "filter-elle18-nail",
+        "Liner Qdel": "filter-liner-qdel"
+    };
 
-    <!-- Link to JavaScript -->
-    <script src="script.js"></script>
-</body>
-</html>
+    Object.entries(filterKeys).forEach(([key, id]) => {
+        const filterElement = document.getElementById(id);
+        if (filterElement) {
+            let uniqueValues = [...new Set(jsonData.map(item => item[key]).filter(Boolean))];
+            console.log(`Values for ${key}:`, uniqueValues); // Debugging Log
+            filterElement.innerHTML = `<option value="">${key}</option>` + 
+                uniqueValues.map(value => `<option value="${value}">${value}</option>`).join("");
+        } else {
+            console.error(`Element not found: ${id}`);
+        }
+    });
+}
+
+function applyFilters() {
+    let filteredData = [...jsonData];
+
+    const filterKeys = {
+        "ME Name": document.getElementById("filter-me-name").value,
+        "Beat": document.getElementById("filter-beat").value,
+        "Simple": document.getElementById("filter-simple").value,
+        "GLUTA": document.getElementById("filter-gluta").value,
+        "Sun Range": document.getElementById("filter-sun-range").value,
+        "Elle18 Lqd Lip": document.getElementById("filter-elle18-lqd-lip").value,
+        "Lakme FMatte Foundation": document.getElementById("filter-lakme-fmatte-foundation").value,
+        "Elle18 Nail": document.getElementById("filter-elle18-nail").value,
+        "Liner Qdel": document.getElementById("filter-liner-qdel").value
+    };
+
+    Object.keys(filterKeys).forEach(key => {
+        if (filterKeys[key]) {
+            filteredData = filteredData.filter(row => row[key] === filterKeys[key]);
+        }
+    });
+
+    const searchQuery = document.getElementById("search-bar").value.toLowerCase();
+    if (searchQuery) {
+        filteredData = filteredData.filter(row => 
+            row["HUL Code"].toLowerCase().includes(searchQuery) || 
+            row["HUL Outlet Name"].toLowerCase().includes(searchQuery)
+        );
+    }
+
+    if (filterButton1Active) {
+        filteredData = filteredData.filter(row => Number(row["Coverage"]) < 500);
+    }
+
+    console.log("Filtered Data:", filteredData); // Debugging Log
+    populateTable(filteredData);
+}
+
+// Event Listeners
+document.getElementById("reset-button").addEventListener("click", () => {
+    filterButton1Active = false;
+    document.getElementById("filter-button-1").style.backgroundColor = "blue";
+    document.getElementById("search-bar").value = "";
+    document.querySelectorAll("select").forEach(select => select.value = "");
+    applyFilters();
+});
+
+document.getElementById("search-bar").addEventListener("input", applyFilters);
+document.querySelectorAll("select").forEach(select => select.addEventListener("change", applyFilters));
+
+document.getElementById("filter-button-1").addEventListener("click", () => {
+    filterButton1Active = !filterButton1Active;
+    document.getElementById("filter-button-1").style.backgroundColor = filterButton1Active ? "green" : "blue";
+    applyFilters();
+});
