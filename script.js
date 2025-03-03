@@ -1,14 +1,17 @@
-let filterButton1Active = false;
+document.addEventListener("DOMContentLoaded", function () {
+    fetchData();
+});
+
 let jsonData = [];
+let filterButton1Active = false;
 
 async function fetchData() {
     try {
-        const response = await fetch("data.json");
-        if (!response.ok) throw new Error("Failed to fetch data.");
+        const response = await fetch("data.json"); // Ensure your JSON file is accessible
         jsonData = await response.json();
         console.log("Fetched Data:", jsonData); // Debugging Log
         populateFilters();
-        initialize();
+        populateTable(jsonData);
     } catch (error) {
         console.error("Error fetching data:", error);
     }
@@ -17,14 +20,15 @@ async function fetchData() {
 function populateTable(data) {
     const tableBody = document.getElementById("table-body");
     tableBody.innerHTML = "";
-    data.forEach(item => {
-        const row = document.createElement("tr");
-        Object.values(item).forEach(value => {
-            const cell = document.createElement("td");
-            cell.textContent = value;
-            row.appendChild(cell);
+
+    data.forEach(row => {
+        const tr = document.createElement("tr");
+        Object.values(row).forEach(value => {
+            const td = document.createElement("td");
+            td.textContent = value;
+            tr.appendChild(td);
         });
-        tableBody.appendChild(row);
+        tableBody.appendChild(tr);
     });
 }
 
@@ -38,8 +42,7 @@ function populateFilters() {
         "Elle18 Lqd Lip": "filter-elle18-lqd-lip",
         "Lakme FMatte Foundation": "filter-lakme-fmatte-foundation",
         "Elle18 Nail": "filter-elle18-nail",
-        "Liner Qdel": "filter-liner-qdel",
-        "Hair Serum": "filter-hair-serum"
+        "Liner Qdel": "filter-liner-qdel"
     };
 
     Object.entries(filterKeys).forEach(([key, id]) => {
@@ -49,6 +52,8 @@ function populateFilters() {
             console.log(`Values for ${key}:`, uniqueValues); // Debugging Log
             filterElement.innerHTML = `<option value="">${key}</option>` + 
                 uniqueValues.map(value => `<option value="${value}">${value}</option>`).join("");
+        } else {
+            console.error(`Element not found: ${id}`);
         }
     });
 }
@@ -65,8 +70,7 @@ function applyFilters() {
         "Elle18 Lqd Lip": document.getElementById("filter-elle18-lqd-lip").value,
         "Lakme FMatte Foundation": document.getElementById("filter-lakme-fmatte-foundation").value,
         "Elle18 Nail": document.getElementById("filter-elle18-nail").value,
-        "Liner Qdel": document.getElementById("filter-liner-qdel").value,
-        "Hair Serum": document.getElementById("filter-hair-serum").value
+        "Liner Qdel": document.getElementById("filter-liner-qdel").value
     };
 
     Object.keys(filterKeys).forEach(key => {
@@ -74,8 +78,6 @@ function applyFilters() {
             filteredData = filteredData.filter(row => row[key] === filterKeys[key]);
         }
     });
-
-    console.log("Filtered Data:", filteredData); // Debugging Log
 
     const searchQuery = document.getElementById("search-bar").value.toLowerCase();
     if (searchQuery) {
@@ -89,9 +91,11 @@ function applyFilters() {
         filteredData = filteredData.filter(row => Number(row["Coverage"]) < 500);
     }
 
+    console.log("Filtered Data:", filteredData); // Debugging Log
     populateTable(filteredData);
 }
 
+// Event Listeners
 document.getElementById("reset-button").addEventListener("click", () => {
     filterButton1Active = false;
     document.getElementById("filter-button-1").style.backgroundColor = "blue";
@@ -102,15 +106,9 @@ document.getElementById("reset-button").addEventListener("click", () => {
 
 document.getElementById("search-bar").addEventListener("input", applyFilters);
 document.querySelectorAll("select").forEach(select => select.addEventListener("change", applyFilters));
+
 document.getElementById("filter-button-1").addEventListener("click", () => {
     filterButton1Active = !filterButton1Active;
     document.getElementById("filter-button-1").style.backgroundColor = filterButton1Active ? "green" : "blue";
     applyFilters();
 });
-
-function initialize() {
-    populateTable(jsonData);
-    applyFilters();
-}
-
-fetchData();
