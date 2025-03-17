@@ -94,6 +94,14 @@ function applyFilters() {
     console.log("Filtered Data:", filteredData); // Debugging Log
     populateFilters(filteredData); // Update filters dynamically based on filtered data
     populateTable(filteredData);
+
+    // Dynamically update "Beat" filter based on selected "ME Name"
+    const selectedME = document.getElementById("filter-me-name").value;
+    if (selectedME) {
+        const relevantBeats = [...new Set(filteredData.filter(item => item["ME Name"] === selectedME).map(item => item["Beat"]).filter(Boolean))];
+        const beatFilter = document.getElementById("filter-beat");
+        beatFilter.innerHTML = `<option value="">Beat</option>` + relevantBeats.map(value => `<option value="${value}">${value}</option>`).join("");
+    }
 }
 
 // Event Listeners
