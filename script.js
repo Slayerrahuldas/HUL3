@@ -76,6 +76,8 @@ function applyFilters() {
         if (!uniqueBeats.includes(selectedBeat)) {
             beatFilter.value = "";
         }
+    } else {
+        populateFilters(); // Reset beat filter when ME Name is cleared
     }
 
     if (selectedBeat) {
@@ -120,6 +122,7 @@ document.getElementById("reset-button").addEventListener("click", () => {
     document.getElementById("filter-button-1").style.backgroundColor = "blue";
     document.getElementById("search-bar").value = "";
     document.querySelectorAll("select").forEach(select => select.value = "");
+    populateFilters(); // Reset all filters, including Beat
     applyFilters();
 });
 
