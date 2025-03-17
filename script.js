@@ -32,7 +32,7 @@ function populateTable(data) {
     });
 }
 
-function populateFilters() {
+function populateFilters(filteredData = jsonData) {
     const filterKeys = {
         "ME Name": "filter-me-name",
         "Beat": "filter-beat",
@@ -48,7 +48,7 @@ function populateFilters() {
     Object.entries(filterKeys).forEach(([key, id]) => {
         const filterElement = document.getElementById(id);
         if (filterElement) {
-            let uniqueValues = [...new Set(jsonData.map(item => item[key]).filter(Boolean))];
+            let uniqueValues = [...new Set(filteredData.map(item => item[key]).filter(Boolean))];
             console.log(`Values for ${key}:`, uniqueValues); // Debugging Log
             filterElement.innerHTML = `<option value="">${key}</option>` + 
                 uniqueValues.map(value => `<option value="${value}">${value}</option>`).join("");
@@ -92,6 +92,7 @@ function applyFilters() {
     }
 
     console.log("Filtered Data:", filteredData); // Debugging Log
+    populateFilters(filteredData); // Update filters dynamically based on filtered data
     populateTable(filteredData);
 }
 
@@ -101,7 +102,7 @@ document.getElementById("reset-button").addEventListener("click", () => {
     document.getElementById("filter-button-1").style.backgroundColor = "blue";
     document.getElementById("search-bar").value = "";
     document.querySelectorAll("select").forEach(select => select.value = "");
-    populateFilters(); // Ensure filters repopulate correctly
+    populateFilters(jsonData); // Ensure filters repopulate correctly
     setTimeout(applyFilters, 0); // Delay to ensure filters reset before applying
 });
 
