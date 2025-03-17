@@ -61,30 +61,9 @@ function populateFilters() {
 function applyFilters() {
     let filteredData = [...jsonData];
 
-    const selectedMEName = document.getElementById("filter-me-name").value;
-    const selectedBeat = document.getElementById("filter-beat").value;
-
-    if (selectedMEName) {
-        filteredData = filteredData.filter(row => row["ME Name"] === selectedMEName);
-        
-        // Dynamically update the Beat dropdown
-        let uniqueBeats = [...new Set(filteredData.map(row => row["Beat"]).filter(Boolean))];
-        const beatFilter = document.getElementById("filter-beat");
-        beatFilter.innerHTML = `<option value="">Beat</option>` + 
-            uniqueBeats.map(beat => `<option value="${beat}">${beat}</option>`).join("");
-
-        if (!uniqueBeats.includes(selectedBeat)) {
-            beatFilter.value = "";
-        }
-    } else {
-        populateFilters(); // Reset beat filter when ME Name is cleared
-    }
-
-    if (selectedBeat) {
-        filteredData = filteredData.filter(row => row["Beat"] === selectedBeat);
-    }
-
-    const filterKeys = {
+    const filterValues = {
+        "ME Name": document.getElementById("filter-me-name").value,
+        "Beat": document.getElementById("filter-beat").value,
         "Simple": document.getElementById("filter-simple").value,
         "GLUTA": document.getElementById("filter-gluta").value,
         "Sun Range": document.getElementById("filter-sun-range").value,
@@ -94,9 +73,9 @@ function applyFilters() {
         "Liner Qdel": document.getElementById("filter-liner-qdel").value
     };
 
-    Object.keys(filterKeys).forEach(key => {
-        if (filterKeys[key]) {
-            filteredData = filteredData.filter(row => row[key] === filterKeys[key]);
+    Object.keys(filterValues).forEach(key => {
+        if (filterValues[key]) {
+            filteredData = filteredData.filter(row => row[key] === filterValues[key]);
         }
     });
 
@@ -122,8 +101,8 @@ document.getElementById("reset-button").addEventListener("click", () => {
     document.getElementById("filter-button-1").style.backgroundColor = "blue";
     document.getElementById("search-bar").value = "";
     document.querySelectorAll("select").forEach(select => select.value = "");
-    populateFilters(); // Reset all filters, including Beat
-    applyFilters();
+    populateFilters(); // Ensure filters repopulate correctly
+    setTimeout(applyFilters, 0); // Delay to ensure filters reset before applying
 });
 
 document.getElementById("search-bar").addEventListener("input", applyFilters);
@@ -134,5 +113,3 @@ document.getElementById("filter-button-1").addEventListener("click", () => {
     document.getElementById("filter-button-1").style.backgroundColor = filterButton1Active ? "green" : "blue";
     applyFilters();
 });
-
-document.getElementById("filter-me-name").addEventListener("change", applyFilters);
