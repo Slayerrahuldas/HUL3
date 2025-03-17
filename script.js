@@ -7,9 +7,9 @@ let filterButton1Active = false;
 
 async function fetchData() {
     try {
-        const response = await fetch("data.json"); // Ensure your JSON file is accessible
+        const response = await fetch("data.json");
         jsonData = await response.json();
-        console.log("Fetched Data:", jsonData); // Debugging Log
+        console.log("Fetched Data:", jsonData);
         populateFilters();
         populateTable(jsonData);
     } catch (error) {
@@ -20,7 +20,6 @@ async function fetchData() {
 function populateTable(data) {
     const tableBody = document.getElementById("table-body");
     tableBody.innerHTML = "";
-
     data.forEach(row => {
         const tr = document.createElement("tr");
         Object.values(row).forEach(value => {
@@ -49,11 +48,8 @@ function populateFilters(filteredData = jsonData) {
         const filterElement = document.getElementById(id);
         if (filterElement) {
             let uniqueValues = [...new Set(filteredData.map(item => item[key]).filter(Boolean))];
-            console.log(`Values for ${key}:`, uniqueValues); // Debugging Log
             filterElement.innerHTML = `<option value="">${key}</option>` + 
                 uniqueValues.map(value => `<option value="${value}">${value}</option>`).join("");
-        } else {
-            console.error(`Element not found: ${id}`);
         }
     });
 }
@@ -79,30 +75,14 @@ function applyFilters() {
         }
     });
 
-    const searchQuery = document.getElementById("search-bar").value.toLowerCase();
-    if (searchQuery) {
-        filteredData = filteredData.filter(row => 
-            row["HUL Code"].toLowerCase().includes(searchQuery) || 
-            row["HUL Outlet Name"].toLowerCase().includes(searchQuery)
-        );
-    }
-
-    if (filterButton1Active) {
-        filteredData = filteredData.filter(row => Number(row["Coverage"]) < 500);
-    }
-
-    console.log("Filtered Data:", filteredData); // Debugging Log
-    populateFilters(filteredData); // Update filters dynamically based on filtered data
+    populateFilters(filteredData);
     populateTable(filteredData);
-
-    // Dynamically update "Beat" filter based on selected "ME Name"
-    const selectedME = document.getElementById("filter-me-name").value;
-    if (selectedME) {
-        const relevantBeats = [...new Set(filteredData.filter(item => item["ME Name"] === selectedME).map(item => item["Beat"]).filter(Boolean))];
-        const beatFilter = document.getElementById("filter-beat");
-        beatFilter.innerHTML = `<option value="">Beat</option>` + relevantBeats.map(value => `<option value="${value}">${value}</option>`).join("");
-    }
 }
+
+// Cascading Filters for all dropdowns
+document.querySelectorAll("select").forEach(select => {
+    select.addEventListener("change", applyFilters);
+});
 
 // Event Listeners
 document.getElementById("reset-button").addEventListener("click", () => {
@@ -110,13 +90,10 @@ document.getElementById("reset-button").addEventListener("click", () => {
     document.getElementById("filter-button-1").style.backgroundColor = "blue";
     document.getElementById("search-bar").value = "";
     document.querySelectorAll("select").forEach(select => select.value = "");
-    populateFilters(jsonData); // Ensure filters repopulate correctly
-    setTimeout(applyFilters, 0); // Delay to ensure filters reset before applying
+    fetchData();
 });
 
 document.getElementById("search-bar").addEventListener("input", applyFilters);
-document.querySelectorAll("select").forEach(select => select.addEventListener("change", applyFilters));
-
 document.getElementById("filter-button-1").addEventListener("click", () => {
     filterButton1Active = !filterButton1Active;
     document.getElementById("filter-button-1").style.backgroundColor = filterButton1Active ? "green" : "blue";
