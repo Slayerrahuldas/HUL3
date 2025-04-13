@@ -1,8 +1,9 @@
+let filterButtonActive = false;
 let jsonData = [];
 
 async function fetchData() {
     try {
-        const response = await fetch("json/sales.json");
+        const response = await fetch("json/drives.json");
         if (!response.ok) throw new Error("Failed to fetch data.");
         jsonData = await response.json();
         initialize();
@@ -15,137 +16,99 @@ function populateTable(data) {
     const tableBody = document.getElementById("table-body");
     tableBody.innerHTML = "";
 
-    // Columns to total
-    const totalColumns = ["LYRR", "JQRR", "L3M", "MTD"];
-    let totals = { "LYRR": 0, "JQRR": 0, "L3M": 0, "MTD": 0 };
-
-    // Get selected values from dropdowns
-    const selectedMeName = document.getElementById("filter-me-name").value || "ALL ME";
-    const selectedBeat = document.getElementById("filter-beat").value || "ALL Beats";
-
-    // Calculate totals
-    data.forEach(item => {
-        totalColumns.forEach(key => {
-            totals[key] += parseFloat(item[key]) || 0;
-        });
-    });
-
-    // Create Total Row
-    const totalRow = document.createElement("tr");
-    totalRow.style.fontWeight = "bold";
-    totalRow.style.backgroundColor = "#f2f2f2";
-
-    let totalIndexCell = document.createElement("td");
-    totalIndexCell.textContent = "Total";
-    totalRow.appendChild(totalIndexCell);
-
-    ["HUL Code", "HUL Outlet Name"].forEach(() => {
-        let emptyCell = document.createElement("td");
-        emptyCell.textContent = "-";
-        totalRow.appendChild(emptyCell);
-    });
-
-    // Set "ME Name" column as selected dropdown value
-    let meNameCell = document.createElement("td");
-    meNameCell.textContent = selectedMeName;
-    totalRow.appendChild(meNameCell);
-
-    // Set "Beat" column as selected dropdown value
-    let beatCell = document.createElement("td");
-    beatCell.textContent = selectedBeat;
-    totalRow.appendChild(beatCell);
-
-    totalColumns.forEach(key => {
-        let totalCell = document.createElement("td");
-        totalCell.textContent = totals[key]; // No decimal formatting
-        totalRow.appendChild(totalCell);
-    });
-
-    tableBody.appendChild(totalRow);
-
-    // Populate Data Rows (Row Number is reversed, but data order is maintained)
-    const totalRows = data.length;
-    data.forEach((item, index) => {  
+    data.forEach((item, index) => {
         const row = document.createElement("tr");
-        
-        // Reverse row numbering but keep data order unchanged
-        const cellIndex = document.createElement("td");
-        cellIndex.textContent = totalRows - index; // Reverse numbering
-        row.appendChild(cellIndex);
 
-        ["HUL Code", "HUL Outlet Name", "ME Name", "Beat", "LYRR", "JQRR", "L3M", "MTD"].forEach(key => {
-            const cell = document.createElement("td");
-            cell.textContent = item[key] || "-";
-            row.appendChild(cell);
+        // Add row number Reverse order
+        row.appendChild(createCell(data.length - index));
+
+        // Add table data
+        ["HUL Code", "HUL Outlet Name", "ME Name", "BEAT", "BasePack Desc", "Target (VMQ)", "Achv Qty", "Status"].forEach(key => {
+            row.appendChild(createCell(item[key]));
         });
 
         tableBody.appendChild(row);
     });
 }
 
-function applyFilters() {
-    let filteredData = [...jsonData];
-    const filterMeName = document.getElementById("filter-me-name").value;
-    const filterBeat = document.getElementById("filter-beat").value;
-    const searchQuery = document.getElementById("search-bar").value.toLowerCase();
+// 🛠 Utility function to create table cells (Fixes Zero Display Issue)
+function createCell(value) {
+    const cell = document.createElement("td");
+    cell.textContent = value === 0 ? "0" : value !== undefined && value !== null ? value : "";
+    return cell;
+}
 
-    if (filterMeName) {
-        filteredData = filteredData.filter(row => row["ME Name"] === filterMeName);
-    }
-    if (filterBeat) {
-        filteredData = filteredData.filter(row => row["Beat"] === filterBeat);
-    }
-    if (searchQuery) {
-        filteredData = filteredData.filter(row => 
-            row["HUL Code"].toLowerCase().includes(searchQuery) ||
-            row["HUL Outlet Name"].toLowerCase().includes(searchQuery)
+function applyFilters() {
+    let filteredData = jsonData.filter(row => {
+        return (
+            (getFilterValue("filter-me-name") === "" || row["ME Name"] === getFilterValue("filter-me-name")) &&
+            (getFilterValue("filter-beat") === "" || row["BEAT"] === getFilterValue("filter-beat")) &&
+            (getFilterValue("filter-basepack-desc") === "" || row["BasePack Desc"] === getFilterValue("filter-basepack-desc")) &&
+            (document.getElementById("search-bar").value === "" || 
+                row["HUL Code"].toLowerCase().includes(document.getElementById("search-bar").value.toLowerCase()) ||
+                row["HUL Outlet Name"].toLowerCase().includes(document.getElementById("search-bar").value.toLowerCase()))
         );
+    });
+
+    if (filterButtonActive) {
+        filteredData = filteredData.filter(row => row["Status"] === "Pending");
     }
+
     populateTable(filteredData);
     updateDropdowns(filteredData);
 }
 
-function updateDropdowns(filteredData) {
-    const meNames = new Set(), beats = new Set();
-    filteredData.forEach(row => {
-        if (row["ME Name"]) meNames.add(row["ME Name"]);
-        if (row["Beat"]) beats.add(row["Beat"]);
-    });
-    populateSelectDropdown("filter-me-name", meNames, "ME Name");
-    populateSelectDropdown("filter-beat", beats, "Beat");
+// 🛠 Helper function to get filter values
+function getFilterValue(id) {
+    return document.getElementById(id).value;
 }
 
-function populateSelectDropdown(id, optionsSet, columnName) {
+function updateDropdowns(filteredData) {
+    const headers = ["ME Name", "BEAT", "BasePack Desc"];
+    headers.forEach(header => populateDropdown(`filter-${header.toLowerCase().replace(/ /g, '-')}`, getUniqueValues(filteredData, header), header));
+}
+
+// 🛠 Extract unique values for dropdowns
+function getUniqueValues(data, key) {
+    return [...new Set(data.map(item => item[key]).filter(Boolean))];
+}
+
+// 🛠 Populate dropdowns dynamically
+function populateDropdown(id, options, defaultText) {
     const dropdown = document.getElementById(id);
     const selectedValue = dropdown.value;
     dropdown.innerHTML = "";
 
-    // Dropdown header
-    const defaultOption = document.createElement("option");
-    defaultOption.textContent = columnName;
-    defaultOption.value = "";
-    dropdown.appendChild(defaultOption);
+    dropdown.appendChild(new Option(defaultText, "", true));
 
-    optionsSet.forEach(option => {
-        const optionElement = document.createElement("option");
-        optionElement.textContent = option;
-        optionElement.value = option;
+    options.forEach(option => {
+        const optionElement = new Option(option, option);
         if (option === selectedValue) optionElement.selected = true;
         dropdown.appendChild(optionElement);
     });
 }
 
+// 📌 Event Listeners
 document.getElementById("reset-button").addEventListener("click", () => {
+    filterButtonActive = false;
+    document.getElementById("filter-button-1").style.backgroundColor = "blue";
     document.getElementById("search-bar").value = "";
-    document.getElementById("filter-me-name").selectedIndex = 0;
-    document.getElementById("filter-beat").selectedIndex = 0;
+    ["filter-me-name", "filter-beat", "filter-basepack-desc"].forEach(id => document.getElementById(id).selectedIndex = 0);
     applyFilters();
 });
 
 document.getElementById("search-bar").addEventListener("input", applyFilters);
 document.getElementById("filter-me-name").addEventListener("change", applyFilters);
 document.getElementById("filter-beat").addEventListener("change", applyFilters);
+document.getElementById("filter-basepack-desc").addEventListener("change", applyFilters);
 
+document.getElementById("filter-button-1").addEventListener("click", () => {
+    filterButtonActive = !filterButtonActive;
+    document.getElementById("filter-button-1").style.backgroundColor = filterButtonActive ? "green" : "blue";
+    applyFilters();
+});
+
+// 🚀 Initialize
 function initialize() {
     populateTable(jsonData);
     applyFilters();
